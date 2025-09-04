@@ -5,6 +5,9 @@ const crypto = require('crypto');
 // Load environment variables
 require('dotenv').config();
 
+// Handle HTTP parser issue for Pesepay API
+process.env.NODE_OPTIONS = '--insecure-http-parser';
+
 // Import fetch for Node.js
 const fetch = require('node-fetch');
 
