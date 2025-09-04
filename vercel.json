@@ -13,8 +13,6 @@
     }
   ],
   "env": {
-    "PESEPAY_INTEGRATION_KEY": "@pesepay-integration-key",
-    "PESEPAY_ENCRYPTION_KEY": "@pesepay-encryption-key",
     "NODE_ENV": "production"
   }
 }
