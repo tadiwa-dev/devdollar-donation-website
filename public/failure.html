@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed - DevDollar.org</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'shake': 'shake 0.5s ease-in-out',
+                        'fade-in': 'fadeIn 1s ease-in-out'
+                    },
+                    keyframes: {
+                        shake: {
+                            '0%, 100%': { transform: 'translateX(0)' },
+                            '25%': { transform: 'translateX(-5px)' },
+                            '75%': { transform: 'translateX(5px)' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-red-500 via-pink-500 to-rose-600">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Failure Card -->
+        <div class="max-w-md mx-auto mt-16 animate-fade-in">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 text-center">
+                <!-- Failure Icon -->
+                <div class="w-20 h-20 bg-gradient-to-r from-red-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-shake">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+
+                <!-- Failure Message -->
+                <h1 class="text-3xl font-bold text-gray-800 mb-4">
+                    Payment Failed ❌
+                </h1>
+                
+                <p class="text-gray-600 mb-6">
+                    We're sorry, but your payment could not be processed. This could be due to various reasons.
+                </p>
+
+                <!-- Common Issues -->
+                <div class="bg-red-50 rounded-lg p-4 mb-6 text-left">
+                    <h3 class="font-semibold text-red-800 mb-2">Common reasons for failure:</h3>
+                    <ul class="text-sm text-red-700 space-y-1">
+                        <li>• Insufficient funds in your account</li>
+                        <li>• Card expired or invalid</li>
+                        <li>• Network connectivity issues</li>
+                        <li>• Payment method not supported</li>
+                    </ul>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-3">
+                    <button onclick="retryPayment()" 
+                            class="w-full bg-gradient-to-r from-red-600 to-pink-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-red-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-200">
+                        Try Again
+                    </button>
+                    
+                    <a href="/" 
+                       class="block w-full bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-lg hover:bg-gray-200 transition-all duration-200">
+                        Back to Donation Form
+                    </a>
+                    
+                    <a href="https://devdollar.org" 
+                       class="block w-full bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-lg hover:bg-gray-200 transition-all duration-200">
+                        Visit DevDollar.org
+                    </a>
+                </div>
+
+                <!-- Support Info -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <p class="text-sm text-gray-500 mb-2">
+                        Still having issues?
+                    </p>
+                    <a href="mailto:support@devdollar.org" 
+                       class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 animate-fade-in">
+            <p class="text-red-100">
+                Don't worry, you can try again anytime! 💪
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function retryPayment() {
+            // Get the previous payment details from localStorage or sessionStorage if available
+            const previousAmount = sessionStorage.getItem('donationAmount');
+            const previousName = sessionStorage.getItem('donorName');
+            const previousEmail = sessionStorage.getItem('donorEmail');
+            
+            if (previousAmount && previousName && previousEmail) {
+                // Redirect back to form with pre-filled values
+                const params = new URLSearchParams({
+                    amount: previousAmount,
+                    name: previousName,
+                    email: previousEmail,
+                    retry: 'true'
+                });
+                window.location.href = `/?${params.toString()}`;
+            } else {
+                // Just go back to the form
+                window.location.href = '/';
+            }
+        }
+
+        // Store current page info for potential retry
+        window.addEventListener('beforeunload', () => {
+            // This could be enhanced to store more context about the failed payment
+            sessionStorage.setItem('lastFailedPage', 'failure');
+        });
+    </script>
+</body>
+</html>

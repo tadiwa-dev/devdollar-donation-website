@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
+    }
+  ],
+  "env": {
+    "PESEPAY_INTEGRATION_KEY": "@pesepay-integration-key",
+    "PESEPAY_ENCRYPTION_KEY": "@pesepay-encryption-key",
+    "NODE_ENV": "production"
+  }
+}

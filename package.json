@@ -1,0 +1,26 @@
+{
+  "name": "devdollar-donation-website",
+  "version": "1.0.0",
+  "description": "Donation website for devdollar.org with Pesepay integration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --insecure-http-parser server.js",
+    "dev": "nodemon --exec \"node --insecure-http-parser\" server.js"
+  },
+  "keywords": [
+    "donation",
+    "pesepay",
+    "devdollar"
+  ],
+  "author": "DevDollar Team",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

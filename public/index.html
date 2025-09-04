@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support DevDollar.org - Make a Donation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8 animate-fade-in">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                Support DevDollar.org
+            </h1>
+            <p class="text-xl text-blue-100 max-w-2xl mx-auto">
+                Your donation helps us continue building amazing developer tools and resources for the community.
+            </p>
+        </div>
+
+        <!-- Donation Form Card -->
+        <div class="max-w-md mx-auto animate-slide-up">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 transform hover:scale-105 transition-transform duration-300">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Make a Donation</h2>
+                    <p class="text-gray-600 mt-2">Every contribution makes a difference</p>
+                </div>
+
+                <form id="donationForm" action="/create-payment" method="POST" class="space-y-6">
+                    <!-- Amount Input -->
+                    <div>
+                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
+                            Donation Amount (USD)
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                            <input 
+                                type="number" 
+                                id="amount" 
+                                name="amount" 
+                                min="1" 
+                                step="0.01" 
+                                required
+                                class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                placeholder="Enter Amount"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Name Input -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Full Name
+                        </label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                            placeholder="Enter Full Name"
+                        >
+                    </div>
+
+                    <!-- Email Input -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                            Email Address
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                            placeholder="Enter Email Address"
+                        >
+                    </div>
+
+                    <!-- Phone Number Input -->
+                    <div>
+                        <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-2">
+                            Phone Number
+                        </label>
+                        <input 
+                            type="tel" 
+                            id="phoneNumber" 
+                            name="phoneNumber" 
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                            placeholder="Enter Phone Number"
+                        >
+                    </div>
+
+                    <!-- Card Details Section -->
+                    <div class="border-t pt-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Payment Information</h3>
+                        
+                        <!-- Card Number -->
+                        <div class="mb-4">
+                            <label for="creditCardNumber" class="block text-sm font-medium text-gray-700 mb-2">
+                                Card Number
+                            </label>
+                            <input 
+                                type="text" 
+                                id="creditCardNumber" 
+                                name="creditCardNumber" 
+                                required
+                                maxlength="19"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                placeholder="1234 5678 9012 3456"
+                            >
+                        </div>
+
+                        <!-- Expiry Date and CVV -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="creditCardExpiryDate" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Expiry Date
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="creditCardExpiryDate" 
+                                    name="creditCardExpiryDate" 
+                                    required
+                                    maxlength="5"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    placeholder="MM/YY"
+                                >
+                            </div>
+                            <div>
+                                <label for="creditCardSecurityNumber" class="block text-sm font-medium text-gray-700 mb-2">
+                                    CVV
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="creditCardSecurityNumber" 
+                                    name="creditCardSecurityNumber" 
+                                    required
+                                    maxlength="4"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    placeholder="123"
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donate Button -->
+                    <button 
+                        type="submit" 
+                        id="donateBtn"
+                        class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    >
+                        <span id="btnText">Donate Now</span>
+                        <span id="btnLoading" class="hidden">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Processing...
+                        </span>
+                    </button>
+                </form>
+
+                <!-- Security Notice -->
+                <div class="mt-6 text-center">
+                    <p class="text-xs text-gray-500">
+                        🔒 Your payment is secured by Pesepay. We never store your payment information.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 animate-fade-in">
+            <p class="text-blue-100">
+                Made with ❤️ for the developer community
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Format card number with spaces
+        document.getElementById('creditCardNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            if (formattedValue.length <= 19) {
+                e.target.value = formattedValue;
+            }
+        });
+
+        // Format expiry date
+        document.getElementById('creditCardExpiryDate').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // Only allow numbers for CVV
+        document.getElementById('creditCardSecurityNumber').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+
+        document.getElementById('donationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const amount = formData.get('amount');
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const phoneNumber = formData.get('phoneNumber');
+            const creditCardNumber = formData.get('creditCardNumber');
+            const creditCardExpiryDate = formData.get('creditCardExpiryDate');
+            const creditCardSecurityNumber = formData.get('creditCardSecurityNumber');
+
+            // Show loading state
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+            const donateBtn = document.getElementById('donateBtn');
+            
+            btnText.classList.add('hidden');
+            btnLoading.classList.remove('hidden');
+            donateBtn.disabled = true;
+
+            try {
+                // Submit form data directly to server
+                const response = await fetch('/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        amount: amount,
+                        name: name,
+                        email: email,
+                        phoneNumber: phoneNumber,
+                        creditCardNumber: creditCardNumber,
+                        creditCardExpiryDate: creditCardExpiryDate,
+                        creditCardSecurityNumber: creditCardSecurityNumber
+                    })
+                });
+
+                if (response.redirected) {
+                    // Server redirected to success/failure page
+                    window.location.href = response.url;
+                } else {
+                    throw new Error('Payment creation failed');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to create payment. Please try again.');
+                
+                // Reset button state
+                btnText.classList.remove('hidden');
+                btnLoading.classList.add('hidden');
+                donateBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
