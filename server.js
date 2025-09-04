@@ -8,8 +8,48 @@ require('dotenv').config();
 // Handle HTTP parser issue for Pesepay API
 process.env.NODE_OPTIONS = '--insecure-http-parser';
 
-// Import fetch for Node.js
-const fetch = require('node-fetch');
+// Import https for HTTP requests (more tolerant of malformed headers)
+const https = require('https');
+
+// Custom fetch function using https module to handle malformed headers
+function customFetch(url, options = {}) {
+  return new Promise((resolve, reject) => {
+    const urlObj = new URL(url);
+    const requestOptions = {
+      hostname: urlObj.hostname,
+      port: urlObj.port || 443,
+      path: urlObj.pathname + urlObj.search,
+      method: options.method || 'GET',
+      headers: options.headers || {},
+      // Disable strict HTTP parsing
+      insecureHTTPParser: true
+    };
+
+    const req = https.request(requestOptions, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        resolve({
+          status: res.statusCode,
+          statusText: res.statusMessage,
+          json: () => Promise.resolve(JSON.parse(data)),
+          text: () => Promise.resolve(data)
+        });
+      });
+    });
+
+    req.on('error', (error) => {
+      reject(error);
+    });
+
+    if (options.body) {
+      req.write(options.body);
+    }
+    req.end();
+  });
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -173,16 +213,16 @@ app.post('/create-payment', async (req, res) => {
     console.log('🔐 Encrypted Payload Length:', encryptedPayload.payload.length);
     console.log('🔐 IV:', encryptedPayload.iv);
     
-    // 4. Call Pesepay Seamless API
-    const response = await fetch("https://api.pesepay.com/api/payments-engine/v2/payments/make-payment", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "authorization": process.env.PESEPAY_INTEGRATION_KEY
-      },
-      body: JSON.stringify(requestBody)
-    });
+            // 4. Call Pesepay Seamless API using custom fetch
+        const response = await customFetch("https://api.pesepay.com/api/payments-engine/v2/payments/make-payment", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "authorization": process.env.PESEPAY_INTEGRATION_KEY
+          },
+          body: JSON.stringify(requestBody)
+        });
 
     console.log('Pesepay API Response Status:', response.status, response.statusText);
     
