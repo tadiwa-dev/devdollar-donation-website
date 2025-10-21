@@ -25,70 +25,40 @@ function formatAmount(amount) {
   }).format(amount);
 }
 
-async function createPayment(amount, paymentMethod, phone = null, mobileMethod = null) {
+async function createPayment(amount) {
   try {
     const isMobile = isMobileWebView();
     const submitButton = document.querySelector('.give-button');
     const originalText = submitButton.textContent;
     
     // Show loading state
-    submitButton.textContent = 'Processing...';
+    submitButton.textContent = 'Creating Payment...';
     submitButton.disabled = true;
     
-    let endpoint, requestBody;
-    
-    if (paymentMethod === 'mobile') {
-      // Use mobile money express checkout
-      endpoint = '/create-mobile-payment';
-      requestBody = { 
-        amount: amount,
-        phone: phone,
-        method: mobileMethod
-      };
-    } else {
-      // Use traditional Paynow redirect
-      endpoint = '/create-payment';
-      requestBody = { 
-        amount: amount,
-        isMobile: isMobile
-      };
-    }
-
-    const response = await fetch(endpoint, {
+    const response = await fetch('/create-payment', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify({ 
+        amount: amount,
+        isMobile: isMobile
+      })
     });
 
     const data = await response.json();
     
     if (data.success) {
-      if (paymentMethod === 'mobile') {
-        // Handle mobile money express checkout
-        console.log('Mobile payment created:', data.method);
-        
-        // Show instructions to user
-        submitButton.textContent = 'Check Your Phone';
-        alert(`Payment request sent!\n\n${data.instructions}\n\nPlease check your ${data.method.toUpperCase()} for the payment prompt.`);
-        
-        // Start polling for payment status
-        startStatusPolling(data.pollUrl, data.reference);
-        
-      } else {
-        // Handle traditional Paynow redirect
-        console.log('Payment created for:', isMobile ? 'Mobile App' : 'Web Browser');
-        console.log('Return URL:', data.returnUrl);
-        
-        // Show success message briefly before redirect
-        submitButton.textContent = 'Redirecting to Paynow...';
-        
-        // Redirect to Paynow for payment
-        setTimeout(() => {
-          window.location.href = data.redirectUrl;
-        }, 1000);
-      }
+      console.log('Payment link created for:', isMobile ? 'Mobile App' : 'Web Browser');
+      console.log('Return URL:', data.returnUrl);
+      
+      // Show redirect message
+      submitButton.textContent = 'Redirecting to Paynow...';
+      
+      // Redirect to Paynow payment page
+      setTimeout(() => {
+        window.location.href = data.redirectUrl;
+      }, 800);
     } else {
       // Reset button state
       submitButton.textContent = originalText;
@@ -106,72 +76,8 @@ async function createPayment(amount, paymentMethod, phone = null, mobileMethod =
   }
 }
 
-async function startStatusPolling(pollUrl, reference) {
-  const maxAttempts = 60; // Poll for up to 5 minutes
-  let attempts = 0;
-  
-  const pollInterval = setInterval(async () => {
-    attempts++;
-    
-    try {
-      const response = await fetch(`/poll-status/${encodeURIComponent(pollUrl)}`);
-      const status = await response.json();
-      
-      if (status.paid) {
-        clearInterval(pollInterval);
-        
-        // Payment successful
-        const submitButton = document.querySelector('.give-button');
-        submitButton.textContent = 'Payment Successful! ✅';
-        submitButton.style.background = '#10B981';
-        
-        // Show success message
-        setTimeout(() => {
-          alert('Thank you for your donation! Your payment has been received.');
-          
-          // Redirect based on context
-          if (isMobileWebView()) {
-            // For mobile app
-            const appScheme = 'devdollar';
-            const redirectUrl = `${appScheme}://payment-complete?reference=${reference}&status=paid`;
-            window.location.href = redirectUrl;
-          } else {
-            // For web browser
-            window.location.href = '/thankyou.html';
-          }
-        }, 2000);
-        
-      } else if (attempts >= maxAttempts) {
-        clearInterval(pollInterval);
-        
-        // Timeout
-        const submitButton = document.querySelector('.give-button');
-        submitButton.textContent = 'Payment Timeout';
-        submitButton.disabled = false;
-        
-        alert('Payment verification timed out. Please try again or contact support if you completed the payment.');
-      }
-      
-    } catch (error) {
-      console.error('Status polling error:', error);
-      
-      if (attempts >= maxAttempts) {
-        clearInterval(pollInterval);
-        
-        const submitButton = document.querySelector('.give-button');
-        submitButton.textContent = 'Check Failed';
-        submitButton.disabled = false;
-        
-        alert('Unable to verify payment status. Please contact support if you completed the payment.');
-      }
-    }
-  }, 5000); // Check every 5 seconds
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   const amountInput = document.getElementById('amount');
-  const phoneInput = document.getElementById('phone');
-  const mobileFields = document.getElementById('mobile-fields');
   const note = document.getElementById('note');
 
   // Prefill amount if ?amount= is present (useful for mobile webview)
@@ -182,64 +88,17 @@ document.addEventListener('DOMContentLoaded', () => {
     note.style.color = '#4F8FF7';
   }
 
-  // Handle payment method switching
-  const paymentOptions = document.querySelectorAll('.payment-option');
-  const paymentRadios = document.querySelectorAll('input[name="paymentMethod"]');
-  
-  paymentOptions.forEach(option => {
-    option.addEventListener('click', () => {
-      // Remove active class from all options
-      paymentOptions.forEach(opt => opt.classList.remove('active'));
-      // Add active class to clicked option
-      option.classList.add('active');
-      
-      // Check the radio button
-      const radio = option.querySelector('input[type="radio"]');
-      radio.checked = true;
-      
-      // Show/hide mobile fields
-      const method = radio.value;
-      if (method === 'mobile') {
-        mobileFields.style.display = 'block';
-        phoneInput.required = true;
-      } else {
-        mobileFields.style.display = 'none';
-        phoneInput.required = false;
-      }
-    });
-  });
-
   // Handle form submission
   document.getElementById('donation-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const amount = amountInput.value;
-    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-    const phone = phoneInput.value;
-    const mobileMethod = document.getElementById('mobileMethod').value;
     
     // Validate amount
     if (!amount || Number(amount) <= 0) {
       alert('Please enter a valid amount');
       amountInput.focus();
       return;
-    }
-
-    // Validate mobile fields if mobile payment selected
-    if (paymentMethod === 'mobile') {
-      if (!phone || phone.trim() === '') {
-        alert('Please enter your mobile number');
-        phoneInput.focus();
-        return;
-      }
-      
-      // Basic phone number validation for Zimbabwe
-      const cleanPhone = phone.replace(/\s+/g, '');
-      if (!/^(07[0-9]{8}|263[0-9]{9}|\+263[0-9]{9})$/.test(cleanPhone)) {
-        alert('Please enter a valid Zimbabwean mobile number (e.g., 0771234567)');
-        phoneInput.focus();
-        return;
-      }
     }
 
     // Validate reasonable amount (optional)
@@ -251,8 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Create payment with appropriate method
-    await createPayment(amount, paymentMethod, phone, mobileMethod);
+    // Create payment link and redirect to Paynow
+    await createPayment(amount);
   });
 
   // Add some interactive feedback
@@ -262,19 +121,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   amountInput.addEventListener('blur', () => {
     amountInput.style.transform = 'scale(1)';
-  });
-  
-  // Format phone number as user types
-  phoneInput.addEventListener('input', (e) => {
-    let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
-    
-    // Format as 077 123 4567
-    if (value.length > 3 && value.length <= 6) {
-      value = value.replace(/(\d{3})(\d+)/, '$1 $2');
-    } else if (value.length > 6) {
-      value = value.replace(/(\d{3})(\d{3})(\d+)/, '$1 $2 $3');
-    }
-    
-    e.target.value = value;
   });
 });
