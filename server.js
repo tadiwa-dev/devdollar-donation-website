@@ -123,6 +123,7 @@ app.post('/create-payment', async (req, res) => {
         returnUrl: paynow.returnUrl
       });
     } else {
+      console.error('Paynow payment creation failed:', response.error);
       res.status(400).json({
         success: false,
         error: response.error || 'Payment creation failed'
@@ -138,10 +139,85 @@ app.post('/create-payment', async (req, res) => {
   }
 });
 
-// Handle Paynow result notifications (IPN)
+// Express checkout for mobile money (EcoCash, OneMoney)
+app.post('/create-mobile-payment', async (req, res) => {
+  try {
+    const { amount, phone, method } = req.body;
+    
+    // Validate inputs
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+      return res.status(400).json({ error: 'Valid amount is required' });
+    }
+    
+    if (!phone || !method) {
+      return res.status(400).json({ error: 'Phone number and payment method are required' });
+    }
+    
+    if (!['ecocash', 'onemoney'].includes(method.toLowerCase())) {
+      return res.status(400).json({ error: 'Only EcoCash and OneMoney are supported' });
+    }
+
+    // Generate unique reference
+    const reference = `DEV_DOLLAR_MOBILE_${Date.now()}`;
+    
+    // Create payment
+    const payment = paynow.createPayment(reference);
+    payment.add('Development Dollar Donation', Number(amount));
+
+    // Send mobile money payment
+    const response = await paynow.sendMobile(payment, phone, method.toLowerCase());
+
+    if (response.success) {
+      res.json({
+        success: true,
+        instructions: response.instructions,
+        pollUrl: response.pollUrl,
+        reference: reference,
+        method: method.toLowerCase()
+      });
+    } else {
+      console.error('Mobile payment creation failed:', response.error);
+      res.status(400).json({
+        success: false,
+        error: response.error || 'Mobile payment creation failed'
+      });
+    }
+
+  } catch (error) {
+    console.error('Mobile payment creation error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+});
+
+// Handle Paynow result notifications (IPN) with hash verification
 app.post('/paynow/result', (req, res) => {
-  // Log the result for debugging
-  console.log('Paynow result:', req.body);
+  try {
+    // Parse and verify the status update
+    const statusResponse = paynow.parseStatusUpdate(req.body);
+    
+    // Verify hash for security
+    if (!paynow.verifyHash(req.body)) {
+      console.error('⚠️ Invalid hash in Paynow result notification');
+      return res.status(400).send('Invalid hash');
+    }
+    
+    console.log('✅ Paynow result verified:', {
+      reference: statusResponse.reference,
+      amount: statusResponse.amount,
+      status: statusResponse.status,
+      paynowReference: statusResponse.paynowreference,
+      paymentChannel: statusResponse.paymentchannel || 'Unknown'
+    });
+    
+    // Here you can update your database, send notifications, etc.
+    // based on the payment status
+    
+  } catch (error) {
+    console.error('Error processing Paynow result:', error);
+  }
   
   // Always respond with "OK" to acknowledge receipt
   res.send('OK');
