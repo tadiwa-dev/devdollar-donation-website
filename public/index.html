@@ -119,6 +119,101 @@
       transform: translateY(0);
     }
 
+    .payment-methods {
+      margin: 20px 0;
+    }
+
+    .method-title {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .payment-option {
+      display: block;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .payment-option:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .payment-option.active {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .payment-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .option-content {
+      color: white;
+    }
+
+    .option-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .option-desc {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .mobile-fields {
+      margin: 16px 0;
+      display: block;
+    }
+
+    .phone-input, .method-select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 16px;
+      color: white;
+      margin-bottom: 12px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .phone-input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .phone-input:focus, .method-select:focus {
+      border-color: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .method-select {
+      cursor: pointer;
+    }
+
+    .method-select option {
+      background: #4F8FF7;
+      color: white;
+    }
+
+    .mobile-fields.hidden {
+      display: none;
+    }
+
     .note {
       text-align: center;
       color: #4F8FF7;
@@ -172,6 +267,45 @@
           step="0.01" 
           required 
         />
+        
+        <!-- Payment Method Selection -->
+        <div class="payment-methods">
+          <div class="method-title">Choose Payment Method:</div>
+          
+          <label class="payment-option active" data-method="mobile">
+            <input type="radio" name="paymentMethod" value="mobile" checked>
+            <div class="option-content">
+              <div class="option-title">📱 Mobile Money Express</div>
+              <div class="option-desc">EcoCash, OneMoney (No login required)</div>
+            </div>
+          </label>
+          
+          <label class="payment-option" data-method="paynow">
+            <input type="radio" name="paymentMethod" value="paynow">
+            <div class="option-content">
+              <div class="option-title">💳 Paynow Account</div>
+              <div class="option-desc">Login with your Paynow account</div>
+            </div>
+          </label>
+        </div>
+        
+        <!-- Mobile Money Fields (shown by default) -->
+        <div id="mobile-fields" class="mobile-fields">
+          <input 
+            type="tel" 
+            id="phone" 
+            name="phone" 
+            class="phone-input"
+            placeholder="Mobile Number (e.g., 0771234567)" 
+            pattern="[0-9+\-\s\(\)]+"
+          />
+          
+          <select id="mobileMethod" name="mobileMethod" class="method-select">
+            <option value="ecocash">EcoCash</option>
+            <option value="onemoney">OneMoney</option>
+          </select>
+        </div>
+        
         <button type="submit" class="give-button">Give Now</button>
       </form>
     </div>
