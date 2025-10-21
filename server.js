@@ -138,12 +138,11 @@ app.post('/create-payment', async (req, res) => {
 
 // Generate Paynow Simple Payment Request Link
 function generatePaynowLink(reference, amount, merchantEmail, returnUrl, locked = 1) {
-  // Build arguments string
+  // Build arguments string (returnurl is not supported in Simple Payment Request)
   const args = [
     `search=${encodeURIComponent(merchantEmail)}`,
     `amount=${encodeURIComponent(amount.toFixed(2))}`,
     `reference=${encodeURIComponent(reference)}`,
-    `returnurl=${encodeURIComponent(returnUrl)}`,
     `l=${locked}`
   ].join('&');
   

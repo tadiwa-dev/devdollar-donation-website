@@ -50,15 +50,34 @@ async function createPayment(amount) {
     
     if (data.success) {
       console.log('Payment link created for:', isMobile ? 'Mobile App' : 'Web Browser');
-      console.log('Return URL:', data.returnUrl);
       
-      // Show redirect message
-      submitButton.textContent = 'Redirecting to Paynow...';
+      // Show user instructions before redirect
+      if (isMobile) {
+        submitButton.textContent = 'Redirecting to Paynow...';
+        // For mobile apps, show a brief instruction
+        setTimeout(() => {
+          alert('You will now be redirected to Paynow to complete your payment. After payment, please return to this app.');
+        }, 500);
+      } else {
+        submitButton.textContent = 'Redirecting to Paynow...';
+        // For web browsers, provide clear instructions  
+        setTimeout(() => {
+          if (confirm('You will now be redirected to Paynow to complete your payment.\n\nAfter payment, please return to this tab to see your confirmation.\n\nClick OK to continue.')) {
+            window.location.href = data.redirectUrl;
+          } else {
+            // Reset if user cancels
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
+          }
+          return;
+        }, 500);
+        return; // Don't auto-redirect for web
+      }
       
-      // Redirect to Paynow payment page
+      // Auto-redirect for mobile after brief delay
       setTimeout(() => {
         window.location.href = data.redirectUrl;
-      }, 800);
+      }, 2000);
     } else {
       // Reset button state
       submitButton.textContent = originalText;
