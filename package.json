@@ -1,0 +1,18 @@
+{
+  "name": "development-dollar-site",
+  "version": "0.1.0",
+  "description": "Donation site for East Zimbabwe Conference - Development Dollar campaign",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^4.18.2",
+    "paynow": "^2.2.2"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
