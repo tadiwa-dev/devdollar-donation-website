@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/health",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/create-payment",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/paynow/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/return/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/poll-status/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
+  ]
+}
