@@ -87,7 +87,7 @@ app.get('/return/:type', (req, res) => {
   }
 });
 
-// Create Paynow Simple Payment Request Link
+// Create payment and get redirect URL
 app.post('/create-payment', async (req, res) => {
   try {
     const { amount, isMobile } = req.body;
@@ -99,33 +99,36 @@ app.post('/create-payment', async (req, res) => {
     // Generate unique reference
     const reference = `DEV_DOLLAR_${Date.now()}`;
     
-    // Get merchant email from environment
-    const merchantEmail = process.env.PAYNOW_MERCHANT_EMAIL || 'your-email@domain.com';
-    
     // Set return URL based on whether this is a mobile request
     const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-    let returnUrl;
     if (isMobile) {
-      returnUrl = `${baseUrl}/return/mobile?reference=${reference}`;
+      paynow.returnUrl = `${baseUrl}/return/mobile?reference=${reference}`;
     } else {
-      returnUrl = `${baseUrl}/thankyou.html`;
+      paynow.returnUrl = `${baseUrl}/thankyou.html`;
     }
     
-    // Build the Paynow Simple Payment Request URL
-    const paynowUrl = generatePaynowLink(
-      reference,
-      Number(amount),
-      merchantEmail,
-      returnUrl,
-      1 // locked = 1 (amount and reference cannot be changed)
-    );
+    // Create payment using the API (not Simple Payment Request)
+    const payment = paynow.createPayment(reference);
+    payment.add('Development Dollar Donation', Number(amount));
 
-    res.json({
-      success: true,
-      redirectUrl: paynowUrl,
-      reference: reference,
-      returnUrl: returnUrl
-    });
+    // Send to Paynow
+    const response = await paynow.send(payment);
+
+    if (response.success) {
+      res.json({
+        success: true,
+        redirectUrl: response.redirectUrl,
+        pollUrl: response.pollUrl,
+        reference: reference,
+        returnUrl: paynow.returnUrl
+      });
+    } else {
+      console.error('Paynow payment creation failed:', response.error);
+      res.status(400).json({
+        success: false,
+        error: response.error || 'Payment creation failed'
+      });
+    }
 
   } catch (error) {
     console.error('Payment creation error:', error);
@@ -135,33 +138,6 @@ app.post('/create-payment', async (req, res) => {
     });
   }
 });
-
-// Generate Paynow Simple Payment Request Link
-function generatePaynowLink(reference, amount, merchantEmail, returnUrl, locked = 1) {
-  // Build arguments string (returnurl is not supported in Simple Payment Request)
-  const args = [
-    `search=${encodeURIComponent(merchantEmail)}`,
-    `amount=${encodeURIComponent(amount.toFixed(2))}`,
-    `reference=${encodeURIComponent(reference)}`,
-    `l=${locked}`
-  ].join('&');
-  
-  console.log('Payment arguments:', args);
-  
-  // Base64 encode (URL-safe)
-  const base64Args = Buffer.from(args, 'utf8').toString('base64');
-  
-  // URL encode the base64 string
-  const encodedArgs = encodeURIComponent(base64Args);
-  
-  console.log('Encoded arguments:', encodedArgs);
-  
-  // Build final Paynow URL
-  const finalUrl = `https://www.paynow.co.zw/payment/link/?q=${encodedArgs}`;
-  console.log('Final Paynow URL:', finalUrl);
-  
-  return finalUrl;
-}
 
 // Handle Paynow result notifications (IPN) with hash verification
 app.post('/paynow/result', (req, res) => {
