@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (prefill) {
     amountInput.value = prefill;
     note.textContent = '✓ Amount prefilled from app';
-    note.style.color = 'rgba(255, 255, 255, 0.9)';
+    note.style.color = '#4F8FF7';
   }
 
   // Handle form submission
